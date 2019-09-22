@@ -37,4 +37,24 @@ struct DataFrame { // represents the available sensor information at the same ti
     std::map<int,int> bbMatches; // bounding box matches between previous and current frame
 };
 
+struct perfStats {
+    std::string detectorType;
+    std::string descriptorType;
+    std::string matchingType;
+    std::string selectorType;
+    int   numKeyPointsPerframe[20];
+    int   numKeyPointsPerROI[20];
+    int   numMatchedKeyPoints[20];
+    double detectorTime[20];
+    double descriptorTime[20];
+    double MatcherTime[20];
+    double ttcCamera[20];
+    double ttcLidar[20];
+    };
+
+struct returnInfo {
+        int numPoints;
+        double elaspsedtime_ms;
+    };
+
 #endif /* dataStructures_h */
