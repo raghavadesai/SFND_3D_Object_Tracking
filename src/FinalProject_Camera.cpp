@@ -26,9 +26,12 @@ using namespace std;
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+//#include <cstdlib>
+//#include <filesystem>
+//namespace fs = std::filesystem;
 // create an ofstream for the file output
 std::string filename = "PerfReport.csv";
-std::ofstream outputFile(filename, ios::out);
+std::ofstream outputFile(filename, ios::out|ios::trunc);
 /* RRD Change End */
 
 /* MAIN PROGRAM */
@@ -87,8 +90,8 @@ int main(int argc, const char *argv[])
     bool bSave = true;
     string SaveImageFolder;
 
-    vector<std::string> detectorTypeList   = { "SHITOMASI", "HARRIS", "FAST", "BRISK", "ORB", "AKAZE", "SIFT"};  
-    vector<std::string> descriptorTypeList = { "BRISK", "BRIEF", "ORB", "FREAK", "AKAZE", "SIFT"};                        
+    vector<std::string> detectorTypeList   = { "SHITOMASI", "FAST", "BRISK", "AKAZE", "SIFT"};  
+    vector<std::string> descriptorTypeList = { "BRISK", "BRIEF", "ORB", "FREAK", "AKAZE", "SIFT"};                       
     vector<std::string> matcherTypeList    = { "MAT_BF"};
     vector<std::string> selectorTypeList   = { "SEL_KNN"};
 
@@ -139,10 +142,26 @@ int main(int argc, const char *argv[])
 
         if(bSave)
             {
-                SaveImageFolder = "../resultsImages/" + detectorType + "_" + detectorType;
+                SaveImageFolder = dataPath +"resultsImages/";
                 const char *cp_SaveImageFolder = SaveImageFolder.c_str();
-                mkdir(cp_SaveImageFolder,0755);
-                cout << "****** Created " << cp_SaveImageFolder << "****** " << endl;
+                struct stat st = {0};
+
+                if (stat("/some/directory", &st) == -1) {
+                if( mkdir(cp_SaveImageFolder,0777) == -1 )
+                    cerr << "Error :  " << strerror(errno) << endl;
+                else
+                    cout << "****** Created " << cp_SaveImageFolder << "****** " << endl;
+                }
+
+                SaveImageFolder += detectorType + "_" + descriptorType;
+                cp_SaveImageFolder = SaveImageFolder.c_str();
+                if (stat("/some/directory", &st) == -1) {
+                if (mkdir(cp_SaveImageFolder, 0777) == -1)
+                        cerr
+                    << "Error :  " << strerror(errno) << endl;
+                else
+                    cout << "****** Created " << cp_SaveImageFolder << "****** " << endl;
+                }
             }
             
         dataBuffer.clear();
@@ -203,7 +222,7 @@ int main(int argc, const char *argv[])
             /* CLUSTER LIDAR POINT CLOUD */
 
             // associate Lidar points with camera-based ROI
-            float shrinkFactor = 0.10; // shrinks each bounding box by the given percentage to avoid 3D object merging at the edges of an ROI
+            float shrinkFactor = 0.12; // shrinks each bounding box by the given percentage to avoid 3D object merging at the edges of an ROI
             clusterLidarWithROI((dataBuffer.end()-1)->boundingBoxes, (dataBuffer.end() - 1)->lidarPoints, shrinkFactor, P_rect_00, R_rect_00, RT);
 
             // Visualize 3D objects
@@ -338,12 +357,13 @@ int main(int argc, const char *argv[])
                             prevBB = &(*it2);
                         }
                     }
-
+                    cout << currBB->lidarPoints.size() << ", " <<currBB->lidarPoints.size() << endl;
                     // compute TTC for current match
                     if( currBB->lidarPoints.size()>0 && prevBB->lidarPoints.size()>0 ) // only compute TTC if we have Lidar points
                     {
                         //// STUDENT ASSIGNMENT
                         //// TASK FP.2 -> compute time-to-collision based on Lidar data (implement -> computeTTCLidar)
+                        cout << "#9 : START COMPUTE TTC " << endl;
                         double ttcLidar; 
                         computeTTCLidar(prevBB->lidarPoints, currBB->lidarPoints, sensorFrameRate, ttcLidar);
                         /*RRD Changes Start */
@@ -359,6 +379,7 @@ int main(int argc, const char *argv[])
                         computeTTCCamera((dataBuffer.end() - 2)->keypoints, (dataBuffer.end() - 1)->keypoints, currBB->kptMatches, sensorFrameRate, ttcCamera);
                         /*RRD Changes Start */
                         a_combo.ttcCamera[imgIndex] = ttcCamera;
+                        cout << "#10 : COMPUTE TTC DONE" << endl;
                         /*RRD Changes End */
                         //// EOF STUDENT ASSIGNMENT
 
@@ -371,7 +392,7 @@ int main(int argc, const char *argv[])
                             
                             char str[200];
                             sprintf(str, "TTC Lidar : %f s, TTC Camera : %f s", ttcLidar, ttcCamera);
-                            putText(visImg, str, cv::Point2f(80, 50), cv::FONT_HERSHEY_PLAIN, 2, cv::Scalar(0,0,255));
+                            putText(visImg, str, cv::Point2f(80, 50), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar(0,0,255));
 
                             string windowName = "Final Results : TTC";
                             cv::namedWindow(windowName, 4);
@@ -390,7 +411,7 @@ int main(int argc, const char *argv[])
 
                             char str[200];
                             sprintf(str, "TTC Lidar : %f s, TTC Camera : %f s", ttcLidar, ttcCamera);
-                            putText(visImg, str, cv::Point2f(80, 50), cv::FONT_HERSHEY_PLAIN, 2, cv::Scalar(0,0,255));
+                            putText(visImg, str, cv::Point2f(80, 50), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0,0,255));
 
                             string saveImgFullFilename = SaveImageFolder + "/000000" + imgNumber.str() + imgFileType;
                             const char *cp_saveImgFullFilename = saveImgFullFilename.c_str();

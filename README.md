@@ -34,9 +34,16 @@ In this final project, you will implement the missing parts in the schematic. To
 3. Compile: `cmake .. && make`
 4. Run it: `./3D_object_tracking`.
 
+<<<<<<< HEAD
 ## [Rubric](https://review.udacity.com/#!/rubrics/2550/view) Points
 
 <img src="images/3D_tracking.gif" width="1200"  />
+=======
+
+## [Rubric](https://review.udacity.com/#!/rubrics/2550/view) Points
+
+<img src="images/myFile.gif" width="1200"  />
+>>>>>>> 5549e23... Analyzed performance
 
 #### 1. Match 3D Objects
 
@@ -68,9 +75,25 @@ DONE
 
 Find examples where the TTC estimate of the Lidar sensor does not seem plausible. Describe your observations and provide a sound argumentation why you think this happened.
 
+<<<<<<< HEAD
+=======
+Adjusted ShrinkFactor to get bettrer adn ra;liable Lidar TTC
+>>>>>>> 5549e23... Analyzed performance
 
 #### 6. Performance Evaluation 2
 
 Run several detector / descriptor combinations and look at the differences in TTC estimation. Find out which methods perform best and also include several examples where camera-based TTC estimation is way off. As with Lidar, describe your observations again and also look into potential reasons.
 
+<<<<<<< HEAD
         
+=======
+Ran the algorithsm on sevral combinations of detector/descriptors. HARRIS detector was not giving relaiable reults. So removed it.
+Generated PerfREport.csv report in build folder for each detecteor/descriptor combination with TTC lidar and camera measurements using hte code. 
+
+PerfREport_analyusis.csv on main folder of it is copy of it used to analyze the performance. Based on the anlysis, the top 3
+combinatiosn are:
+
+SHITOMASI/SIFT
+AKAZE/SIFT
+SIFT/SIFT
+>>>>>>> 5549e23... Analyzed performance

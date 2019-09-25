@@ -132,16 +132,15 @@ void show3DObjects(std::vector<BoundingBox> &boundingBoxes, cv::Size worldSize, 
 // associate a given bounding box with the keypoints it contains
 void clusterKptMatchesWithROI(BoundingBox &boundingBox, std::vector<cv::KeyPoint> &kptsPrev, std::vector<cv::KeyPoint> &kptsCurr, std::vector<cv::DMatch> &kptMatches)
 {
-    double avgDist = 0.0f;
     std::vector<cv::DMatch> kptMatchesROI;
-    for( auto itr = kptMatches.begin(); itr != kptMatches.end(); ++itr )
+    for( auto &match : kptMatches)
     {
-        cv::KeyPoint kpt = kptsCurr.at(itr->trainIdx);
-        if( boundingBox.roi.contains(cv::Point(kpt.pt.x, kpt.pt.y)))
-            kptMatchesROI.push_back(*itr);
+        if( boundingBox.roi.contains(kptsCurr.at(match.trainIdx).pt))
+            kptMatchesROI.push_back(match);
     }
     std::cout << "Found " << kptMatchesROI.size() << " matches with in BB ROI" << std::endl;
 
+    double avgDist = 0.0f;
     if( kptMatchesROI.size() > 0 )
     {
         for( auto itr = kptMatchesROI.begin(); itr != kptMatchesROI.end(); ++itr )
@@ -154,11 +153,11 @@ void clusterKptMatchesWithROI(BoundingBox &boundingBox, std::vector<cv::KeyPoint
         return;
     }
     /* Do thresholding to elimiante outliers */
-    double threshold = avgDist * 0.7;
-    for( auto itr = kptMatchesROI.begin(); itr != kptMatchesROI.end(); ++itr )
+    double threshold = avgDist * 0.8;
+    for( auto &itr : kptMatchesROI )
     {
-        if( itr->distance < threshold )
-            boundingBox.kptMatches.push_back(*itr);
+        if( itr.distance < threshold )
+            boundingBox.kptMatches.push_back(itr);
     }
     std::cout << "After thresholding  " << boundingBox.kptMatches.size() << "matches remained in BB ROI" << std::endl;    
 
